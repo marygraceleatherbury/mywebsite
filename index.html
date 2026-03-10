@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============================================================
+    PAGE TITLE — change this to whatever you want in the browser tab
+  ============================================================ -->
+  <title>Mary Grace Leatherbury — Portfolio</title>
+
+  <!-- ============================================================
+    GOOGLE FONTS
+    - Cormorant Garamond: the big serif used for headings & name
+    - DM Mono: the small monospace used for body text & labels
+    Change the URL here if you want different fonts from Google Fonts
+  ============================================================ -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+
+    /* ============================================================
+      RESET
+      Removes all default browser margin/padding and makes
+      border-box sizing consistent across all elements
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+
+    /* ============================================================
+      COLOR VARIABLES
+      Change these hex values to retheme the entire site at once.
+      --cream  → main background color
+      --ink    → main text / dark color
+      --warm   → accent color (currently a tan/brown)
+      --light  → slightly darker background used in some sections
+      --mid    → muted text color
+      --white  → near-white used in the about section background
+    ============================================================ */
+    :root {
+      --cream: #f5f2ec;
+      --ink:   #1a1814;
+      --warm:  #9e7c5c;
+      --light: #e8e3da;
+      --mid:   #6b6560;
+      --white: #fdfcfa;
+    }
+
+    /* Smooth scrolling when nav links are clicked */
+    html { scroll-behavior: smooth; }
+
+    /* ============================================================
+      BODY / BASE STYLES
+      Sets the default font, size, and background for everything.
+      cursor: none hides the default cursor so the custom dot cursor works
+    ============================================================ */
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      cursor: none; /* hides default cursor — custom cursor is in JS below */
+    }
+
+
+    /* ============================================================
+      CUSTOM CURSOR
+      A small dot that follows the mouse. JS at the bottom moves it.
+      .cursor.expanded = bigger ring when hovering links/cards
+    ============================================================ */
+    .cursor {
+      position: fixed; top: 0; left: 0;
+      width: 10px; height: 10px;
+      background: var(--ink);
+      border-radius: 50%;
+      pointer-events: none; /* so it doesn't block clicks */
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.15s ease, background 0.2s ease, width 0.2s ease, height 0.2s ease;
+    }
+    .cursor.expanded {
+      width: 40px; height: 40px;
+      background: transparent;
+      border: 1px solid var(--ink);
+    }
+
+
+    /* ============================================================
+      NAVIGATION BAR
+      Fixed to the top of the screen so it stays visible while scrolling.
+      .nav-name = your name on the left
+      .nav-links = the links on the right (About, Work, Experience, Contact)
+    ============================================================ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 2rem 3rem;
+    }
+
+    /* Your name in the top-left corner of the nav */
+    .nav-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    /* The list of nav links on the right */
+    .nav-links {
+      display: flex; gap: 2.5rem;
+      list-style: none;
+    }
+
+    /* Each individual nav link */
+    .nav-links a {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      position: relative;
+    }
+
+    /* Animated underline on hover — grows from left to right */
+    .nav-links a::after {
+      content: '';
+      position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: var(--warm);
+      transition: width 0.35s ease;
+    }
+    .nav-links a:hover::after { width: 100%; }
+
+
+    /* ============================================================
+      HERO SECTION
+      The very first thing people see — full-screen, split into two halves.
+      Left half = text. Right half = image/visual.
+    ============================================================ */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* two equal columns */
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Left half of the hero — contains name, subtitle, and CTA button */
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end; /* pushes content to the bottom */
+      padding: 6rem 3rem 5rem 3rem;
+      background: var(--cream);
+      z-index: 2;
+    }
+
+    /* Small text above the name (e.g. "Software Engineer · Clemson") */
+    .hero-eyebrow {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.3s forwards; /* fades in 0.3s after page load */
+    }
+
+    /* Your big name — uses Cormorant Garamond serif */
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4rem, 7vw, 9rem); /* scales with screen width */
+      font-weight: 300;
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards; /* fades in 0.5s after page load */
+    }
+
+    /* The <em> tag inside the title makes "Grace" italic and warm-colored */
+    .hero-title em {
+      font-style: italic;
+      color: var(--warm);
+    }
+
+    /* Short bio paragraph under your name */
+    .hero-sub {
+      margin-top: 2.5rem;
+      max-width: 320px;
+      line-height: 1.8;
+      color: var(--mid);
+      opacity: 0;
+      animation: fadeUp 0.9s 0.7s forwards;
+    }
+
+    /* "View My Work" button — uses an animated line as a pseudo-arrow */
+    .hero-cta {
+      margin-top: 3rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.9s forwards;
+      transition: gap 0.3s ease;
+    }
+    .hero-cta:hover { gap: 1.8rem; } /* gap between line and text grows on hover */
+
+    /* The little line that appears before "View My Work" */
+    .hero-cta::before {
+      content: '';
+      display: block;
+      width: 40px; height: 1px;
+      background: var(--warm);
+      transition: width 0.3s ease;
+    }
+    .hero-cta:hover::before { width: 60px; } /* line gets longer on hover */
+
+    /* Right half of the hero — the colored image area */
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* The colored background block on the right.
+       TO ADD A REAL PHOTO: replace the background gradient with:
+       background-image: url('your-photo.jpg');
+       background-size: cover;
+       background-position: center top;
+    */
+    .hero-image-wrap {
+      position: absolute; inset: 0;
+      background: linear-gradient(145deg, #d6c9b6 0%, #c2b09a 40%, #a8947d 100%);
+      overflow: hidden;
+    }
+
+    /* Decorative parallelogram shape layered on top of the image */
+    .hero-image-wrap::before {
+      content: '';
+      position: absolute;
+      top: 15%; left: 10%;
+      width: 80%; height: 70%;
+      background: linear-gradient(160deg, #e8ddd0 0%, #b8a48e 100%);
+      clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+      opacity: 0.5;
+    }
+
+    /* "MGL" monogram watermark in the bottom-right of the image */
+    .hero-image-wrap::after {
+      content: 'MGL';
+      position: absolute;
+      bottom: 3rem; right: 3rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 8rem;
+      font-weight: 300;
+      color: rgba(255,255,255,0.12);
+      letter-spacing: -0.05em;
+    }
+
+    /* "Scroll" hint at the bottom center of the hero */
+    .hero-scroll-hint {
+      position: absolute;
+      bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      opacity: 0;
+      animation: fadeUp 1s 1.2s forwards;
+      z-index: 5;
+    }
+
+    /* Animated vertical line under "Scroll" */
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--warm), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+
+    /* ============================================================
+      MARQUEE BAND
+      The dark scrolling ticker between the hero and about sections.
+      Lists your skills/keywords in a looping animation.
+      To change the speed, adjust the 22s in .marquee-inner animation below.
+    ============================================================ */
+    .marquee-band {
+      background: var(--ink);
+      padding: 1rem 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    /* Inner track — duplicated in HTML to create a seamless loop */
+    .marquee-inner {
+      display: inline-flex;
+      animation: marquee 22s linear infinite;
+    }
+
+    /* Each text item in the marquee */
+    .marquee-item {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--cream);
+      padding: 0 2.5rem;
+    }
+
+    /* The ✦ separator dot between items */
+    .marquee-dot { color: var(--warm); padding: 0 0.5rem; }
+
+
+    /* ============================================================
+      SHARED SECTION STYLES
+      These apply to all sections (About, Projects, Skills, etc.)
+    ============================================================ */
+
+    /* Default padding for every <section> */
+    section { padding: 8rem 3rem; }
+
+    /* The small label above each section heading (e.g. "— About Me") */
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-bottom: 4rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    /* The little line before the label text */
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 30px; height: 1px;
+      background: var(--warm);
+    }
+
+    /* The large heading in each section (e.g. "Engineer & Advocate.") */
+    .section-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.5rem, 5vw, 5.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+
+    /* ============================================================
+      ABOUT SECTION
+      Two-column layout: text on the left, visual blocks on the right.
+    ============================================================ */
+    .about {
+      background: var(--white);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+
+    .about-text .section-heading { margin-bottom: 2.5rem; }
+
+    /* Bio paragraphs */
+    .about-text p {
+      line-height: 2;
+      color: var(--mid);
+      margin-bottom: 1.2rem;
+    }
+    .about-text p strong { color: var(--ink); font-weight: 400; }
+
+    /* 2x2 grid of stat boxes below the bio text */
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-top: 3rem;
+    }
+
+    /* Individual stat box (e.g. "5 / Active Courses") */
+    .stat-box {
+      background: var(--cream);
+      padding: 2rem 1.5rem;
+    }
+
+    /* The big number/word in each stat box */
+    .stat-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: var(--warm);
+      line-height: 1;
+    }
+
+    /* Small label under the stat number */
+    .stat-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      margin-top: 0.5rem;
+    }
+
+    /* Container for the two overlapping image blocks on the right */
+    .about-visual {
+      position: relative;
+      height: 550px;
+    }
+
+    /* Main large image block (top-left).
+       TO ADD A REAL PHOTO: add background-image: url('photo.jpg'); background-size: cover;
+    */
+    .about-img-main {
+      position: absolute;
+      top: 0; left: 0;
+      width: 75%; height: 85%;
+      background: linear-gradient(135deg, #c9bba8 0%, #a8957f 100%);
+    }
+
+    /* Smaller dark block in the bottom-right with the quote */
+    .about-img-accent {
+      position: absolute;
+      bottom: 0; right: 0;
+      width: 55%; height: 50%;
+      background: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    /* The italic quote text inside the dark block */
+    .about-img-accent span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--cream);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+
+    /* ============================================================
+      PROJECTS SECTION
+      A masonry-style grid of project cards.
+      First card spans 2 columns (wide). Cards 2–4 are portrait.
+      Hover over a card to reveal the project details.
+    ============================================================ */
+    .projects { background: var(--cream); }
+
+    .projects-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 5rem;
+    }
+
+    /* 3-column grid — first card takes up 2 of those columns */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    /* Each project card */
+    .project-card {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+      background: var(--light);
+      cursor: none;
+    }
+
+    /* First card is wide (landscape) */
+    .project-card:first-child {
+      grid-column: span 2;
+      aspect-ratio: 16/9;
+    }
+
+    /* The colored background of each card — zooms in on hover */
+    .project-bg {
+      position: absolute; inset: 0;
+      transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* Individual card background colors — change these gradients to set card colors */
+    .project-card:nth-child(1) .project-bg { background: linear-gradient(135deg, #2a2520 0%, #4a3d31 100%); }
+    .project-card:nth-child(2) .project-bg { background: linear-gradient(135deg, #3d3530 0%, #6b5a49 100%); }
+    .project-card:nth-child(3) .project-bg { background: linear-gradient(135deg, #c9bba8 0%, #8a7a6a 100%); }
+    .project-card:nth-child(4) .project-bg { background: linear-gradient(135deg, #1a1814 0%, #3a332c 100%); }
+
+    /* Background zooms in slightly when the card is hovered */
+    .project-card:hover .project-bg { transform: scale(1.05); }
+
+    /* Dark gradient overlay that appears on hover, revealing project info */
+    .project-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(26,24,20,0.92) 0%, transparent 55%);
+      opacity: 0; /* hidden by default */
+      transition: opacity 0.5s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 2rem;
+    }
+    .project-card:hover .project-overlay { opacity: 1; } /* shows on hover */
+
+    /* Project name that's always faintly visible (before hover) */
+    .project-label-always {
+      position: absolute;
+      bottom: 1.5rem; left: 1.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: rgba(245,242,236,0.55);
+      transition: opacity 0.3s ease;
+    }
+    .project-card:hover .project-label-always { opacity: 0; } /* hides on hover */
+
+    /* Project info block — slides up slightly on hover */
+    .project-info { transform: translateY(10px); transition: transform 0.4s ease; }
+    .project-card:hover .project-info { transform: translateY(0); }
+
+    /* Small tag/category text (e.g. "Java · OOP · JUnit") */
+    .project-tag {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Project title in the overlay */
+    .project-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1.2;
+      margin-bottom: 0.8rem;
+    }
+
+    /* Project description in the overlay */
+    .project-desc {
+      font-size: 11px;
+      color: rgba(245,242,236,0.65);
+      line-height: 1.7;
+    }
+
+    /* Card number (01, 02, etc.) in the top-right corner */
+    .project-num {
+      position: absolute;
+      top: 1.5rem; right: 1.5rem;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      color: rgba(255,255,255,0.25);
+    }
+
+
+    /* ============================================================
+      SKILLS SECTION
+      Dark background section with 4 columns of skill groups.
+      Each column has a category title and a bulleted list of skills.
+    ============================================================ */
+    .skills-section {
+      background: var(--ink); /* dark background */
+      color: var(--cream);
+    }
+
+    /* Override section label color for dark background */
+    .skills-section .section-label { color: var(--warm); }
+    .skills-section .section-label::before { background: var(--warm); }
+    .skills-section .section-heading { color: var(--cream); }
+
+    /* 4-column grid for skill groups */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      margin-top: 4rem;
+    }
+
+    /* Individual skill group card */
+    .skill-group {
+      background: rgba(255,255,255,0.04);
+      padding: 2.5rem 2rem;
+      transition: background 0.3s ease;
+    }
+    .skill-group:hover { background: rgba(255,255,255,0.08); }
+
+    /* Category title inside each skill group (e.g. "Languages") */
+    .skill-group-name {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-bottom: 1.8rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Skill list inside each group */
+    .skill-list { list-style: none; display: flex; flex-direction: column; gap: 0.8rem; }
+
+    /* Individual skill item */
+    .skill-list li {
+      font-size: 12px;
+      color: rgba(245,242,236,0.55);
+      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      transition: color 0.2s ease;
+    }
+    .skill-list li:hover { color: var(--cream); }
+
+    /* Small square bullet before each skill */
+    .skill-list li::before {
+      content: '';
+      display: block;
+      width: 4px; height: 4px;
+      background: var(--warm);
+      flex-shrink: 0;
+    }
+
+
+    /* ============================================================
+      EXPERIENCE SECTION
+      A list of job/education entries laid out in a 3-column grid:
+      [date] [role + company + description] [tag]
+    ============================================================ */
+    .experience { background: var(--light); }
+
+    .exp-list { margin-top: 4rem; display: flex; flex-direction: column; }
+
+    /* Each experience row */
+    .exp-item {
+      display: grid;
+      grid-template-columns: 200px 1fr 160px;
+      gap: 3rem;
+      align-items: start;
+      padding: 3rem 0;
+      border-top: 1px solid rgba(26,24,20,0.12);
+    }
+    .exp-item:last-child { border-bottom: 1px solid rgba(26,24,20,0.12); }
+
+    /* Date column on the left (e.g. "2024 – Present") */
+    .exp-date { font-size: 10px; letter-spacing: 0.15em; color: var(--mid); padding-top: 0.3rem; }
+
+    /* Job title in the middle column */
+    .exp-role {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      font-weight: 300;
+      line-height: 1.15;
+    }
+
+    /* Company name below the job title */
+    .exp-company {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--warm);
+      margin-top: 0.5rem;
+    }
+
+    /* Description paragraph below the company name */
+    .exp-details {
+      font-size: 11px;
+      color: var(--mid);
+      line-height: 1.9;
+      margin-top: 1rem;
+    }
+
+    /* Tag on the far right (e.g. "Co-op", "Education") */
+    .exp-tag {
+      text-align: right;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--mid);
+      padding-top: 0.5rem;
+    }
+
+
+    /* ============================================================
+      CONTACT SECTION
+      Centered text layout with large heading and link buttons.
+    ============================================================ */
+    .contact {
+      background: var(--cream);
+      text-align: center;
+      padding: 10rem 3rem;
+    }
+
+    /* Center the section label (override default left-aligned flex) */
+    .contact .section-label { justify-content: center; }
+    .contact .section-label::before { display: none; } /* hide the left line */
+
+    /* Giant "Get In Touch." heading */
+    .contact-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 8vw, 10rem);
+      font-weight: 300;
+      line-height: 0.9;
+      letter-spacing: -0.03em;
+      margin: 2rem 0 4rem;
+    }
+    .contact-heading em { font-style: italic; color: var(--warm); }
+
+    /* Row of contact link buttons */
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      gap: 4rem;
+      flex-wrap: wrap;
+    }
+
+    /* Each contact link (Email, LinkedIn, GitHub, CV) */
+    .contact-link {
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: color 0.3s ease, gap 0.3s ease;
+    }
+    .contact-link:hover { color: var(--warm); gap: 1.5rem; }
+
+    /* Arrow before each link */
+    .contact-link::before { content: '→'; font-size: 14px; }
+
+
+    /* ============================================================
+      FOOTER
+      Simple dark bar at the bottom with three columns of text.
+    ============================================================ */
+    footer {
+      background: var(--ink);
+      color: var(--mid);
+      padding: 2rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+    }
+
+    /* Your name on the left of the footer — styled in serif italic */
+    footer span:first-child {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      color: var(--cream);
+      font-style: italic;
+    }
+
+
+    /* ============================================================
+      ANIMATIONS
+      fadeUp  → used for hero elements appearing on page load
+      marquee → powers the scrolling ticker band
+      scrollPulse → the pulsing scroll line in the hero
+    ============================================================ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); } /* moves exactly half = seamless loop */
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 1; }
+    }
+
+    /* ============================================================
+      SCROLL REVEAL
+      Elements with class "reveal" start invisible and slide up.
+      JS at the bottom adds "visible" when they enter the viewport.
+    ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+
+    /* ============================================================
+      RESPONSIVE STYLES
+      Adjusts layout for tablets (max 900px) and phones (max 600px).
+      The two-column layouts become single-column on smaller screens.
+    ============================================================ */
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }          /* hero goes single column */
+      .hero-right { height: 50vh; }                  /* image area shrinks */
+      .about { grid-template-columns: 1fr; gap: 3rem; }
+      .about-visual { height: 350px; }
+      .projects-grid { grid-template-columns: 1fr; } /* project cards stack */
+      .project-card:first-child { grid-column: span 1; aspect-ratio: 4/3; }
+      .skills-grid { grid-template-columns: 1fr 1fr; }
+      .exp-item { grid-template-columns: 1fr; gap: 0.5rem; }
+      .exp-tag { text-align: left; }
+      nav { padding: 1.5rem; }
+      .nav-links { gap: 1.5rem; }
+    }
+
+    @media (max-width: 600px) {
+      section { padding: 5rem 1.5rem; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .contact-links { gap: 2rem; flex-direction: column; align-items: center; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+    CUSTOM CURSOR ELEMENT
+    Positioned and moved by JavaScript at the bottom of the file.
+    The "expanded" class is toggled when hovering interactive elements.
+  ============================================================ -->
+  <div class="cursor" id="cursor"></div>
+
+
+  <!-- ============================================================
+    NAVIGATION BAR
+    Fixed at the top. Left = your name. Right = section links.
+    The href values (#about, #projects, etc.) match the id="" on each section.
+  ============================================================ -->
+  <nav>
+    <a href="#" class="nav-name">Mary Grace Leatherbury</a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Work</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+
+  <!-- ============================================================
+    HERO SECTION
+    Split into two halves: text (left) and image area (right).
+    Edit the eyebrow, title, and sub-heading below to update your intro.
+  ============================================================ -->
+  <section class="hero">
+
+    <!-- LEFT HALF: your name and intro text -->
+    <div class="hero-left">
+
+      <!-- Small text above name — edit this tagline -->
+      <p class="hero-eyebrow">Tech + Business &nbsp;·&nbsp; Clemson University &nbsp;·&nbsp; MBUSI Co-op</p>
+
+      <!-- Your name — the <em> tag makes "Grace" italic + warm-colored -->
+      <h1 class="hero-title">
+        Mary<br/>
+        <em>Grace</em><br/>
+        Leatherbury
+      </h1>
+
+      <!-- Short bio sentence -->
+      <p class="hero-sub">
+        CS major exploring technology, product, and brand while championing women in STEM.
+      </p>
+
+      <!-- CTA button — links down to the projects section -->
+      <a href="#projects" class="hero-cta">View My Work</a>
+    </div>
+
+    <!-- RIGHT HALF: image/visual area (currently a placeholder gradient)
+         To use a real photo, go to .hero-image-wrap in the CSS and swap
+         the background gradient for background-image: url('photo.jpg') -->
+    <div class="hero-right">
+      <div class="hero-image-wrap"></div>
+    </div>
+
+    <!-- Scroll hint at the bottom center -->
+    <div class="hero-scroll-hint">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+
+  </section>
+
+
+  <!-- ============================================================
+    MARQUEE BAND
+    The dark scrolling ticker strip between hero and about.
+    The items are duplicated (you'll see two identical sets below) —
+    this creates the seamless infinite loop effect.
+    To add/remove items, edit both sets to keep them identical.
+  ============================================================ -->
+  <div class="marquee-band" aria-hidden="true">
+    <div class="marquee-inner">
+      <!-- FIRST COPY -->
+      <span class="marquee-item">Technical</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Impact-oriented</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Front-End Development</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Mercedes-Benz</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Collaboration</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Brand Communication</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Clemson University</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Women in STEM</span><span class="marquee-dot">✦</span>
+      <!-- SECOND COPY (identical — needed for seamless loop) -->
+      <span class="marquee-item">Technical</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Impact-oriented</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Front-End Development</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Mercedes-Benz</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Collaboration</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Brand Communication</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Clemson University</span><span class="marquee-dot">✦</span>
+      <span class="marquee-item">Women in STEM</span><span class="marquee-dot">✦</span>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+    ABOUT SECTION
+    Two columns: bio text + stats on the left, visual blocks on the right.
+    Edit the paragraphs and stat boxes below.
+  ============================================================ -->
+  <section class="about" id="about">
+
+    <!-- LEFT: bio text and stat grid -->
+    <div class="about-text reveal">
+      <div class="section-label">About Me</div>
+      <h2 class="section-heading">Engineer &amp;<br/><em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--warm)">Advocate.</em></h2>
+
+      <!-- Bio paragraphs — edit these -->
+      <p>I'm a <strong>Computer Science major at Clemson University</strong> with a minor in Brand Communication, currently on co-op at <strong>Mercedes-Benz U.S. International</strong> in Tuscaloosa, AL.</p>
+      <p>My work sits at the intersection of <strong>thoughtful technology and clear communication</strong>. I care deeply about building well-designed solutions and about making tech a more equitable space for women.</p>
+      <p>I study computer science alongside brand communications, exploring how technology, product, and brand come together to shape impactful companies.</p>
+
+      <!-- 2x2 stat boxes — edit the numbers/labels -->
+      <div class="about-stats">
+        <div class="stat-box">
+          <div class="stat-num">5</div>
+          <div class="stat-label">Active Courses</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">MBUSI</div>
+          <div class="stat-label">Current Co-op</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">Java</div>
+          <div class="stat-label">Primary Language</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">Beyond CS</div>
+          <div class="stat-label">Brand Comm. Minor</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: two overlapping visual blocks (main image + dark quote block) -->
+    <div class="about-visual reveal">
+      <!-- Main image placeholder — swap background gradient for a real photo in CSS -->
+      <div class="about-img-main"></div>
+      <!-- Dark block with italic quote -->
+      <div class="about-img-accent">
+        <span>"Good technology works.<br/>Great technology connects."</span>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ============================================================
+    PROJECTS SECTION
+    A grid of 4 project cards. First card is wide (spans 2 cols).
+    Hover over each card to see the project details.
+    To add a 5th card, copy a .project-card block and add a new
+    nth-child(5) gradient color in the CSS.
+  ============================================================ -->
+  <section class="projects" id="projects">
+
+    <div class="projects-header reveal">
+      <div>
+        <div class="section-label">Selected Work</div>
+        <h2 class="section-heading">Projects &amp;<br/>Coursework.</h2>
+      </div>
+    </div>
+
+    <div class="projects-grid">
+
+      <!-- PROJECT CARD 1 (wide — spans 2 columns) -->
+      <div class="project-card reveal">
+        <div class="project-bg"></div>                         <!-- colored background -->
+        <div class="project-label-always">Ataxx</div>          <!-- always-visible label -->
+        <div class="project-num">01</div>                      <!-- corner number -->
+        <div class="project-overlay">                          <!-- hover reveal -->
+          <div class="project-info">
+            <div class="project-tag">Java · OOP · JUnit</div>  <!-- category tag -->
+            <div class="project-title">Extended Ataxx Board Game</div>
+            <div class="project-desc">Full implementation with custom board logic, game-over detection, and comprehensive JUnit test suites — written for CPSC 2150 Software Development Foundations.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECT CARD 2 -->
+      <div class="project-card reveal">
+        <div class="project-bg"></div>
+        <div class="project-label-always">MBUSI</div>
+        <div class="project-num">02</div>
+        <div class="project-overlay">
+          <div class="project-info">
+            <div class="project-tag">Enterprise Java · Co-op</div>
+            <div class="project-title">Mercedes-Benz Software Systems</div>
+            <div class="project-desc">Production-level Java development and unit testing within real-world automotive software workflows at MBUSI's Tuscaloosa facility.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECT CARD 3 -->
+      <div class="project-card reveal">
+        <div class="project-bg"></div>
+        <div class="project-label-always">Brand</div>
+        <div class="project-num">03</div>
+        <div class="project-overlay">
+          <div class="project-info">
+            <div class="project-tag">GC 3700 · Brand Communication</div>
+            <div class="project-title">Brand Identity Projects</div>
+            <div class="project-desc">Exploring how brands construct identity and narrative — bridging technical background with design thinking and strategic communication.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECT CARD 4 -->
+      <div class="project-card reveal">
+        <div class="project-bg"></div>
+        <div class="project-label-always">Research</div>
+        <div class="project-num">04</div>
+        <div class="project-overlay">
+          <div class="project-info">
+            <div class="project-tag">NURS 3300 · Research Methods</div>
+            <div class="project-title">Nursing Research &amp; Evidence Practice</div>
+            <div class="project-desc">Applying quantitative and qualitative research methods — reflecting a commitment to interdisciplinary, evidence-based thinking.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+    SKILLS SECTION
+    Dark background. Four columns of grouped skills.
+    To add a skill: add a new <li> inside any .skill-list
+    To add a new group: copy a .skill-group block and add a 5th column
+    (you'll need to change skills-grid to repeat(5, 1fr) in CSS)
+  ============================================================ -->
+  <section class="skills-section" id="skills">
+
+    <div class="reveal">
+      <div class="section-label">Technical Stack</div>
+      <h2 class="section-heading">Skills &amp;<br/>Technologies.</h2>
+    </div>
+
+    <div class="skills-grid">
+
+      <!-- SKILL GROUP 1: Languages -->
+      <div class="skill-group reveal">
+        <div class="skill-group-name">Languages</div>
+        <ul class="skill-list">
+          <li>Java (Primary)</li>
+          <li>HTML / CSS</li>
+          <li>SQL</li>
+          <li>Python (coursework)</li>
+        </ul>
+      </div>
+
+      <!-- SKILL GROUP 2: Development practices -->
+      <div class="skill-group reveal">
+        <div class="skill-group-name">Development</div>
+        <ul class="skill-list">
+          <li>Object-Oriented Programming</li>
+          <li>Unit Testing (JUnit)</li>
+          <li>Debugging &amp; QA</li>
+          <li>Software Design Patterns</li>
+          <li>Agile Workflows</li>
+        </ul>
+      </div>
+
+      <!-- SKILL GROUP 3: Coursework/academic areas -->
+      <div class="skill-group reveal">
+        <div class="skill-group-name">Academic Focus</div>
+        <ul class="skill-list">
+          <li>Data Structures</li>
+          <li>Discrete Mathematics</li>
+          <li>Software Foundations</li>
+          <li>Research Methods</li>
+          <li>Brand Communication</li>
+        </ul>
+      </div>
+
+      <!-- SKILL GROUP 4: Soft skills -->
+      <div class="skill-group reveal">
+        <div class="skill-group-name">Strengths</div>
+        <ul class="skill-list">
+          <li>Technical Writing</li>
+          <li>Cross-functional Collaboration</li>
+          <li>Women in STEM Advocacy</li>
+          <li>French (Beginner)</li>
+          <li>Strategic Communication</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+    EXPERIENCE SECTION
+    A list of jobs and education entries.
+    Each .exp-item has: [date] [role + company + details] [tag]
+    To add a new entry: copy an .exp-item block and edit its content.
+  ============================================================ -->
+  <section class="experience" id="experience">
+
+    <div class="reveal">
+      <div class="section-label">Experience &amp; Education</div>
+      <h2 class="section-heading">Where I've<br/><em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--warm)">Been.</em></h2>
+    </div>
+
+    <div class="exp-list">
+
+      <!-- EXPERIENCE ENTRY 1 -->
+      <div class="exp-item reveal">
+        <div class="exp-date">2024 – Present</div>  <!-- date on left -->
+        <div>
+          <div class="exp-role">Software Engineering Co-op</div>
+          <div class="exp-company">Mercedes-Benz U.S. International · Tuscaloosa, AL</div>
+          <div class="exp-details">Building and testing Java-based software systems in a professional automotive manufacturing environment. Writing unit tests, debugging production code, and collaborating with engineering teams on real-world software challenges.</div>
+        </div>
+        <div class="exp-tag">Co-op</div>            <!-- tag on right -->
+      </div>
+
+      <!-- EXPERIENCE ENTRY 2 -->
+      <div class="exp-item reveal">
+        <div class="exp-date">2024 – Present</div>
+        <div>
+          <div class="exp-role">B.A. Computer Science</div>
+          <div class="exp-company">Clemson University · Clemson, SC</div>
+          <div class="exp-details">Minor in Brand Communication. Coursework includes Software Development Foundations (CPSC 2150), Discrete Structures (CPSC 2120), Research Methods, and French language studies.</div>
+        </div>
+        <div class="exp-tag">Education</div>
+      </div>
+
+      <!-- EXPERIENCE ENTRY 3 -->
+      <div class="exp-item reveal">
+        <div class="exp-date">Ongoing</div>
+        <div>
+          <div class="exp-role">Women in STEM Advocacy</div>
+          <div class="exp-company">Personal Initiative</div>
+          <div class="exp-details">Actively engaged in conversations and initiatives around gender equity in tech — addressing representation gaps, the wage gap, and systemic barriers facing women in CS and engineering.</div>
+        </div>
+        <div class="exp-tag">Advocacy</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+    CONTACT SECTION
+    Large centered heading + row of link buttons.
+    Update the href values below with your real email and profile URLs.
+  ============================================================ -->
+  <section class="contact" id="contact">
+
+    <div class="section-label reveal">Let's Connect</div>
+
+    <!-- Large heading — "Get In Touch." -->
+    <h2 class="contact-heading reveal">
+      Get In<br/><em>Touch.</em>
+    </h2>
+
+    <!-- Contact link buttons — update href values here -->
+    <div class="contact-links reveal">
+      <a href="mailto:youremail@email.com" class="contact-link">Email Me</a>             <!-- ← change email -->
+      <a href="https://linkedin.com/in/yourprofile" class="contact-link" target="_blank">LinkedIn</a>  <!-- ← change URL -->
+      <a href="https://github.com/yourusername" class="contact-link" target="_blank">GitHub</a>        <!-- ← change URL -->
+      <a href="your-cv.pdf" class="contact-link">Download CV</a>                         <!-- ← link to your CV file -->
+    </div>
+
+  </section>
+
+
+  <!-- ============================================================
+    FOOTER
+    Three text items: name (left), copyright (center), tagline (right).
+  ============================================================ -->
+  <footer>
+    <span>Mary Grace Leatherbury</span>
+    <span>© 2025 · Clemson University</span>
+    <span>Built with intention.</span>
+  </footer>
+
+
+  <!-- ============================================================
+    JAVASCRIPT
+
+    1. CUSTOM CURSOR
+       Tracks the mouse position and moves the .cursor dot accordingly.
+       Adds/removes the "expanded" class when hovering interactive elements.
+
+    2. SCROLL REVEAL
+       Uses IntersectionObserver to watch for elements with class "reveal".
+       When they enter the viewport, it adds class "visible" which
+       triggers the CSS fade-up animation. The stagger delay (i * 80ms)
+       makes multiple elements animate in sequence instead of all at once.
+  ============================================================ -->
+  <script>
+
+    // ── 1. CUSTOM CURSOR ──────────────────────────────────────────
+    const cursor = document.getElementById('cursor');
+
+    // Move the cursor dot to wherever the mouse is
+    document.addEventListener('mousemove', e => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top  = e.clientY + 'px';
+    });
+
+    // Expand the cursor into a ring when hovering links and cards
+    document.querySelectorAll('a, .project-card, .skill-group').forEach(el => {
+      el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
+      el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+    });
+
+
+    // ── 2. SCROLL REVEAL ──────────────────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          // Stagger: each element waits 80ms more than the previous one
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          // Stop watching once it's been revealed (no need to re-trigger)
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      threshold: 0.08,           // trigger when 8% of the element is visible
+      rootMargin: '0px 0px -50px 0px' // trigger slightly before the element fully enters
+    });
+
+    // Attach the observer to every element with class "reveal"
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  </script>
+
+</body>
+</html>
